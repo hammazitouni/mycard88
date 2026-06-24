@@ -315,7 +315,7 @@
     <div class="card-body">
       <div class="field">
         <label>المبلغ (سالب للمصروف، موجب للإضافة)</label>
-        <input type="number" inputmode="decimal" id="adjAmount" placeholder="مثال: -500 أو 80">
+        <input type="text" inputmode="text" id="adjAmount" placeholder="مثال: -500 أو 80">
       </div>
       <div class="field">
         <label>ملاحظة (اختياري)</label>
@@ -595,7 +595,7 @@
   function buildReportText(){
     const t = computeTotals();
     const lines = [];
-    lines.push("📒 تقرير الوكيل اليومي");
+    lines.push("📒 تقرير اليومي");
     lines.push("📅 " + arabicDate(currentDate) + " (" + currentDate + ")");
     lines.push("──────────────────");
     lines.push("💰 Cash payment: " + fmt(t.cashPayment) + " DT");
