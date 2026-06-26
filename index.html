@@ -592,43 +592,35 @@
   });
 
   // ---------- Report generation ----------
-  function buildReportText(){
-    const t = computeTotals();
-    const lines = [];
-    lines.push("📒 تقرير اليومي");
-    lines.push("📅 " + arabicDate(currentDate) + " (" + currentDate + ")");
-    lines.push("──────────────────");
-    lines.push("💰 Cash payment: " + fmt(t.cashPayment) + " DT");
-    lines.push("💸 Cash payout: " + fmt(t.cashPayout) + " DT");
+ function buildReportText(){
+  const t = computeTotals();
+  const lines = [];
+  lines.push("📅 " + arabicDate(currentDate) + " (" + currentDate + ")");
+  lines.push("──────────────────");
+  lines.push("💰 Cash payment: " + fmt(t.cashPayment) + " DT");
+  lines.push("💸 Cash payout: " + fmt(t.cashPayout) + " DT");
+  if(day.vip.length){
     lines.push("");
-    if(day.vip.length){
-      lines.push("👑 عملاء VIP:");
-      day.vip.forEach(v=>{
-        lines.push("• "+v.user+" — شحن "+fmt(v.amount)+" DT ⟶ خصم -"+fmt(v.discount));
-      });
-      lines.push("مجموع خصومات VIP: -" + fmt(t.vipTotal));
-      lines.push("");
-    }
-    if(day.adj.length){
-      lines.push("📝 مصاريف وإضافات:");
-      day.adj.forEach(a=>{
-        const sign = a.amount>=0 ? "+" : "";
-        lines.push("• "+sign+fmt(a.amount)+(a.note ? " ("+a.note+")" : ""));
-      });
-      lines.push("مجموع المصاريف: -" + fmt(t.expTotal));
-      lines.push("مجموع الإضافات: +" + fmt(t.addTotal));
-      lines.push("");
-    }
-    lines.push("──────────────────");
-    lines.push("🧮 الحساب:");
-    lines.push("1) "+fmt(t.cashPayment)+" × 1.2 = "+fmt(t.step1));
-    lines.push("2) "+fmt(t.step1)+" − "+fmt(t.cashPayout)+" = "+fmt(t.base));
-    lines.push("3) "+fmt(t.base)+" − "+fmt(t.vipTotal)+" − "+fmt(t.expTotal)+" = "+fmt(t.base - t.vipTotal - t.expTotal));
-    lines.push("4) "+fmt(t.base - t.vipTotal - t.expTotal)+" + "+fmt(t.addTotal)+" = "+fmt(t.nett));
-    lines.push("──────────────────");
-    lines.push("✅ NETT: " + fmt(t.nett) + " DT");
-    return lines.join("\n");
+    lines.push("👑 عملاء VIP:");
+    day.vip.forEach(v=>{
+      lines.push("• " + v.user + " -" + fmt(v.discount));
+    });
+    lines.push("مجموع خصومات VIP: -" + fmt(t.vipTotal));
   }
+  if(day.adj.length){
+    lines.push("");
+    lines.push("📝 مصاريف وإضافات:");
+    day.adj.forEach(a=>{
+      const sign = a.amount>=0 ? "+" : "";
+      lines.push("• " + sign + fmt(a.amount) + (a.note ? " (" + a.note + ")" : ""));
+    });
+    lines.push("مجموع المصاريف: -" + fmt(t.expTotal));
+    lines.push("مجموع الإضافات: +" + fmt(t.addTotal));
+  }
+  lines.push("──────────────────");
+  lines.push("✅ NETT: " + fmt(t.nett) + " DT");
+  return lines.join("\n");
+}
 
   $("openReport").addEventListener("click", ()=>{
     $("reportText").value = buildReportText();
