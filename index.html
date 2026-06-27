@@ -498,7 +498,10 @@ function fmt(n){ return (Math.round(n*100)/100).toFixed(2); }
 function arabicDate(dateStr){
   const days=["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
   const months=["جانفي","فيفري","مارس","أفريل","ماي","جوان","جويلية","أوت","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
-  const d=new Date(dateStr+"T00:00:00");
+  // Parse manually to avoid timezone shift
+  const parts=dateStr.split("-");
+  const year=parseInt(parts[0]), month=parseInt(parts[1])-1, day=parseInt(parts[2]);
+  const d=new Date(year, month, day);
   return days[d.getDay()]+" "+d.getDate()+" "+months[d.getMonth()]+" "+d.getFullYear();
 }
 function escapeHtml(s){
@@ -599,34 +602,57 @@ function computeTotals(){
 }
 
 /* ── Custom date selects init ── */
+function daysInMonth(year,month){
+  return new Date(parseInt(year), parseInt(month), 0).getDate();
+}
+function updateDayOptions(year, month, selectedDay){
+  const daySel=$("dayDay");
+  const maxDay=daysInMonth(year,month);
+  const curVal=selectedDay||daySel.value;
+  daySel.innerHTML="";
+  for(let d=1;d<=maxDay;d++){
+    const o=document.createElement("option");
+    o.value=String(d).padStart(2,"0");
+    o.textContent=String(d).padStart(2,"0");
+    daySel.appendChild(o);
+  }
+  // keep selected day or clamp to max
+  const clampedDay=Math.min(parseInt(curVal)||1, maxDay);
+  daySel.value=String(clampedDay).padStart(2,"0");
+}
 function initDateSelects(){
+  // Years
   const yearSel=$("dayYear");
   const now=new Date();
-  for(let y=now.getFullYear();y>=now.getFullYear()-1;y--){
+  const curYear=now.getFullYear();
+  for(let y=curYear+1;y>=curYear-3;y--){
     const o=document.createElement("option");
     o.value=String(y); o.textContent=String(y);
     yearSel.appendChild(o);
   }
-  const daySel=$("dayDay");
-  for(let d=1;d<=31;d++){
-    const o=document.createElement("option");
-    o.value=String(d).padStart(2,"0"); o.textContent=String(d).padStart(2,"0");
-    daySel.appendChild(o);
-  }
+  // Days (default 31, updated dynamically)
+  updateDayOptions(curYear, 1, "01");
 }
 function syncSelectsToDate(dateStr){
   const parts=dateStr.split("-");
   $("dayYear").value=parts[0];
   $("dayMonth").value=parts[1];
+  updateDayOptions(parts[0], parts[1], parts[2]);
   $("dayDay").value=parts[2];
 }
 function selectsToDateStr(){
   return $("dayYear").value+"-"+$("dayMonth").value+"-"+$("dayDay").value;
 }
 initDateSelects();
-["dayDay","dayMonth","dayYear"].forEach(function(id){
-  $(id).addEventListener("change",function(){ switchToDate(selectsToDateStr()); });
+// When month or year changes → update days then switch date
+["dayMonth","dayYear"].forEach(function(id){
+  $(id).addEventListener("change",function(){
+    updateDayOptions($("dayYear").value, $("dayMonth").value, $("dayDay").value);
+    switchToDate(selectsToDateStr());
+  });
 });
+// When day changes → switch date directly
+$("dayDay").addEventListener("change",function(){ switchToDate(selectsToDateStr()); });
 
 /* ── Render ── */
 function render(){
