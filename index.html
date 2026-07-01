@@ -848,18 +848,20 @@ function buildReportText(){
   if(day.vip.length){
     lines.push("");
     lines.push("👑 عملاء VIP:");
-    const vipGrouped={};
-    const vipOrder=[];
+    // Group by username
+    const grouped={};
+    const order=[];
     day.vip.forEach(v=>{
-      if(!vipGrouped[v.user]){ vipGrouped[v.user]=[]; vipOrder.push(v.user); }
-      vipGrouped[v.user].push(v.discount);
+      if(!grouped[v.user]){ grouped[v.user]=[]; order.push(v.user); }
+      grouped[v.user].push(v.discount);
     });
-    vipOrder.forEach(userName=>{
-      const discounts=vipGrouped[userName].map(d=>"-"+fmt(d)).join(" ");
-      lines.push("• "+userName+" "+discounts);
+    order.forEach(user=>{
+      const discounts=grouped[user];
+      const parts=discounts.map(d=>"-"+fmt(d)).join(" ");
+      lines.push("• "+user+" "+parts);
     });
     lines.push("مجموع خصومات VIP: -"+fmt(t.vipTotal));
-}
+  }
   if(day.adj.length){
     lines.push("");
     lines.push("📝 مصاريف وإضافات:");
